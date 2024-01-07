@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlixPlus - Gerenciador de Conteúdo</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+    <style>
+        /* Adicione seu estilo CSS aqui */
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>FlixPlus - Gerenciador de Conteúdo</h1>
+    </header>
+
+    <div class="form-container">
+        <form id="addMovieForm">
+            <label for="title">Título:</label>
+            <input type="text" id="title" name="title" required>
+
+            <label for="description">Descrição:</label>
+            <textarea id="description" name="description" rows="4" required></textarea>
+
+            <label for="category">Categoria:</label>
+            <input type="text" id="category" name="category" required>
+
+            <label for="imageUrl">URL da Imagem:</label>
+            <input type="text" id="imageUrl" name="imageUrl" required>
+
+            <button type="submit">Adicionar Filme</button>
+        </form>
+    </div>
+
+    <div class="movie-list-container">
+        <h2>Lista de Filmes</h2>
+        <ul id="movieList"></ul>
+    </div>
+
+    <script type="module">
+        const firebaseConfig = {
+            apiKey: "sua-api-key",
+            authDomain: "seu-domínio.firebaseapp.com",
+            projectId: "seu-projeto-id",
+            storageBucket: "seu-bucket.appspot.com",
+            messagingSenderId: "seu-sender-id",
+            appId: "seu-app-id",
+            measurementId: "seu-measurement-id"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Função para adicionar filme
+        function adicionarFilme(title, description, category, imageUrl) {
+            const filmesRef = database.ref('filmes');
+            const novoFilmeRef = filmesRef.push();
+            novoFilmeRef.set({
+                title: title,
+                description: description,
+                category: category,
+                imageUrl: imageUrl
+            });
+        }
+
+        // Função para listar filmes
+        function listarFilmes() {
+            const movieList = document.getElementById('movieList');
+            const filmesRef = database.ref('filmes');
+
+            filmesRef.on('value', (snapshot) => {
+                movieList.innerHTML = ''; // Limpa a lista antes de atualizar
+
+                snapshot.forEach((childSnapshot) => {
+                    const filme = childSnapshot.val();
+                    const li = document.createElement('li');
+                    li.textContent = `${filme.title} - ${filme.category}`;
+                    movieList.appendChild(li);
+                });
+            });
+        }
+
+        // Adiciona um ouvinte ao formulário
+        document.getElementById('addMovieForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const category = document.getElementById('category').value;
+            const imageUrl = document.getElementById('imageUrl').value;
+
+            adicionarFilme(title, description, category, imageUrl);
+        });
+
+        // Lista os filmes ao carregar a página
+        listarFilmes();
+    </script>
+
+</body>
+</html>
